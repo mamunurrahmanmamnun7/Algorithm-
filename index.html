@@ -3,806 +3,1354 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Algorithm Runner — User Input</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Algorithm Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0b0d18;--bg2:#12152a;--bg3:#181d33;--bg4:#1e2440;
-  --border:#252d4a;--border2:#2e3860;
-  --purple:#7b6cf7;--purple2:#a78bfa;--purple3:#c4b5fd;
-  --blue:#38bdf8;--green:#34d399;--orange:#fb923c;
-  --red:#f87171;--yellow:#fcd34d;--pink:#f472b6;
-  --text:#dde4f5;--text2:#7d8aaa;--text3:#404d6e;
-  --mono:'JetBrains Mono',monospace;
-  --sans:'Syne',sans-serif;
+/* ── RESET & ROOT ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:      #0a0c10;
+  --ink2:     #12161e;
+  --ink3:     #1c2230;
+  --ink4:     #252e42;
+  --line:     #2a3448;
+  --line2:    #3a4560;
+  --muted:    #4e607a;
+  --dim:      #7a90b0;
+  --text:     #c8d8f0;
+  --bright:   #e8f0ff;
+  --white:    #ffffff;
+
+  --cyan:     #00e5ff;
+  --cyan2:    #00b8d4;
+  --amber:    #ffab00;
+  --amber2:   #ff8f00;
+  --green:    #00e676;
+  --green2:   #00c853;
+  --red:      #ff5252;
+  --pink:     #f48fb1;
+  --violet:   #b388ff;
+
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Bebas Neue', sans-serif;
+  --body: 'DM Sans', sans-serif;
+
+  --radius: 10px;
+  --glow-c: rgba(0,229,255,0.15);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* HEADER */
-.hdr{background:linear-gradient(135deg,#0b0d18,#130f2a,#0b1520);
-  border-bottom:1px solid var(--border2);padding:22px 28px;
-  display:flex;align-items:center;gap:16px;}
-.hdr-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--purple),var(--blue));
-  border-radius:12px;display:flex;align-items:center;justify-content:center;
-  font-size:22px;flex-shrink:0;box-shadow:0 0 20px rgba(123,108,247,.4);}
-.hdr h1{font-size:1.45rem;font-weight:800;color:#fff;letter-spacing:-.4px;}
-.hdr p{font-size:.82rem;color:var(--text2);margin-top:2px;}
+html { scroll-behavior: smooth; }
 
-/* TABS */
-.tabs{display:flex;overflow-x:auto;background:var(--bg2);
-  border-bottom:1px solid var(--border);padding:0 16px;scrollbar-width:none;gap:2px;}
-.tabs::-webkit-scrollbar{display:none;}
-.tab{padding:12px 18px;font-family:var(--sans);font-size:.78rem;font-weight:700;
-  color:var(--text3);border:none;background:none;cursor:pointer;white-space:nowrap;
-  border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;}
-.tab:hover{color:var(--text2);background:rgba(255,255,255,.03);}
-.tab.active{color:var(--purple2);border-bottom-color:var(--purple);}
+body {
+  font-family: var(--body);
+  background: var(--ink);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-/* PAGE */
-.page{display:none;padding:24px 20px;max-width:1200px;margin:0 auto;}
-.page.active{display:block;}
+/* ── ANIMATED GRID BACKGROUND ────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-/* ALGO BANNER */
-.banner{display:flex;align-items:flex-start;gap:14px;background:var(--bg2);
-  border:1px solid var(--border);border-left:4px solid var(--purple);
-  border-radius:12px;padding:18px 22px;margin-bottom:22px;}
-.bnum{width:40px;height:40px;flex-shrink:0;background:linear-gradient(135deg,var(--purple),var(--blue));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:1rem;font-weight:800;color:#fff;}
-.binfo h2{font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:4px;}
-.binfo p{font-size:.83rem;color:var(--text2);line-height:1.5;}
-.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;}
-.badge{font-family:var(--mono);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:20px;}
-.b-g{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25);}
-.b-t{background:rgba(56,189,248,.1);color:var(--blue);border:1px solid rgba(56,189,248,.25);}
-.b-p{background:rgba(123,108,247,.1);color:var(--purple2);border:1px solid rgba(123,108,247,.25);}
+/* ── HEADER ──────────────────────────────────────── */
+.header {
+  position: relative;
+  z-index: 10;
+  padding: 36px 40px 28px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(0,229,255,0.04) 0%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+}
 
-/* GRID */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
-@media(max-width:850px){.grid{grid-template-columns:1fr;}}
+.header-left { flex: 1; }
 
-/* PANEL */
-.panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.phead{display:flex;align-items:center;gap:8px;padding:11px 15px;
-  background:var(--bg3);border-bottom:1px solid var(--border);
-  font-size:.75rem;font-weight:700;color:var(--text2);letter-spacing:.7px;text-transform:uppercase;}
-.dot{width:8px;height:8px;border-radius:50%;}
-.dr{background:#ff5f57;}.dy{background:#febc2e;}.dg{background:#28c840;}
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  border: 1px solid rgba(0,229,255,0.3);
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.header-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-/* CODE */
-.code-wrap{overflow:auto;max-height:380px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
-.code-wrap::-webkit-scrollbar{width:5px;height:5px;}
-.code-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-.ctbl{border-collapse:collapse;width:max-content;min-width:100%;font-family:var(--mono);font-size:12.5px;line-height:1.8;}
-.ctbl tr:hover{background:rgba(255,255,255,.025);}
-.ln{width:44px;min-width:44px;padding:0 12px 0 14px;text-align:right;
-  color:var(--text3);font-size:11px;user-select:none;border-right:1px solid var(--border);
-  background:var(--bg3);white-space:nowrap;vertical-align:top;}
-.lc{padding:0 18px 0 14px;white-space:pre;color:var(--text);vertical-align:top;}
-.kw{color:#c792ea;font-weight:600;}.fn{color:#82aaff;}.cm{color:#4a5568;font-style:italic;}
-.nm{color:#f78c6c;}.st{color:#c3e88d;}.tp{color:#ffcb6b;}
-.hl .ln{background:rgba(123,108,247,.2);color:var(--purple2);}
-.hl .lc{background:rgba(123,108,247,.08);}
+.header h1 {
+  font-family: var(--display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: 4px;
+  color: var(--bright);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(0,229,255,0.2);
+}
+.header h1 span { color: var(--cyan); }
 
-/* INPUT PANEL */
-.input-body{padding:16px;}
-.field-label{font-size:.75rem;font-weight:700;color:var(--text2);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:block;}
-.field-desc{font-size:.75rem;color:var(--text3);margin-bottom:8px;font-family:var(--mono);}
-.inp{width:100%;background:var(--bg3);border:1px solid var(--border2);
-  border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:13px;
-  color:var(--text);outline:none;transition:border-color .2s;}
-.inp:focus{border-color:var(--purple);}
-.inp::placeholder{color:var(--text3);}
-.field-group{margin-bottom:14px;}
-.run-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--purple),#5044c0);
-  color:#fff;border:none;border-radius:9px;font-family:var(--sans);font-size:.9rem;
-  font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px;margin-top:4px;}
-.run-btn:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(123,108,247,.45);}
-.reset-btn{width:100%;padding:9px;background:var(--bg3);color:var(--text2);
-  border:1px solid var(--border);border-radius:9px;font-family:var(--sans);
-  font-size:.82rem;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s;}
-.reset-btn:hover{color:var(--text);border-color:var(--border2);}
+.header-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
 
-/* OUTPUT AREA */
-.out-area{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
-  overflow:hidden;margin-bottom:18px;}
-.out-head{padding:11px 16px;background:var(--bg3);border-bottom:1px solid var(--border);
-  font-size:.75rem;font-weight:700;color:var(--text2);letter-spacing:.7px;text-transform:uppercase;}
+/* ── SIDEBAR + MAIN LAYOUT ───────────────────────── */
+.layout {
+  display: flex;
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 120px);
+}
 
-/* STEPS */
-.steps-list{padding:14px 16px;}
-.step-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.step-item:last-child{border-bottom:none;}
-.step-num{width:26px;height:26px;flex-shrink:0;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.75rem;font-weight:700;font-family:var(--mono);}
-.step-content{flex:1;}
-.step-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:3px;}
-.step-detail{font-size:.8rem;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+/* ── SIDEBAR ─────────────────────────────────────── */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--line);
+  padding: 24px 0;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: rgba(18,22,30,0.7);
+  backdrop-filter: blur(10px);
+}
 
-/* TABLE */
-.tbl-wrap{overflow-x:auto;padding:14px 16px;}
-table.res{border-collapse:collapse;width:max-content;min-width:100%;
-  font-family:var(--mono);font-size:12px;}
-table.res th{background:rgba(123,108,247,.2);color:var(--purple2);
-  padding:7px 12px;border:1px solid var(--border2);text-align:center;font-weight:700;}
-table.res td{padding:7px 12px;border:1px solid var(--border);text-align:center;
-  color:var(--text2);background:var(--bg2);}
-table.res td.hi{background:rgba(52,211,153,.15);color:var(--green);font-weight:700;}
-table.res td.lo{background:rgba(123,108,247,.15);color:var(--purple2);}
-table.res tr:hover td{background:rgba(255,255,255,.03);}
+.sidebar-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 20px 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
 
-/* FINAL ANSWER */
-.answer{display:flex;align-items:center;gap:12px;
-  background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.3);
-  border-radius:10px;padding:14px 18px;margin:14px 16px 0;}
-.ans-icon{font-size:1.4rem;}
-.ans-label{font-size:.72rem;font-weight:700;color:rgba(52,211,153,.6);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
-.ans-val{font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--green);}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+.nav-item:hover { background: rgba(0,229,255,0.04); }
+.nav-item.active {
+  background: rgba(0,229,255,0.07);
+  border-left-color: var(--cyan);
+}
+.nav-item.active .nav-num { color: var(--cyan); }
+.nav-item.active .nav-title { color: var(--bright); }
 
-/* ERROR */
-.err-box{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);
-  border-radius:8px;padding:12px 16px;margin:14px 16px;
-  font-family:var(--mono);font-size:.85rem;color:var(--red);}
+.nav-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  width: 20px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.nav-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.tag-greedy { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+.tag-dp     { background: rgba(0,229,255,0.12); color: var(--cyan);  border: 1px solid rgba(0,229,255,0.25); }
+.tag-dp2    { background: rgba(179,136,255,0.12); color: var(--violet); border: 1px solid rgba(179,136,255,0.25); }
 
-/* PLACEHOLDER */
-.placeholder{padding:40px 20px;text-align:center;color:var(--text3);font-size:.88rem;}
-.placeholder .ico{font-size:2.5rem;margin-bottom:12px;}
+.nav-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dim);
+  transition: color 0.2s;
+  line-height: 1.3;
+}
 
-/* ARRAY DISPLAY */
-.arr-disp{display:flex;gap:5px;flex-wrap:wrap;padding:14px 16px;}
-.arr-cell{text-align:center;}
-.arr-val{width:46px;height:46px;display:flex;align-items:center;justify-content:center;
-  border-radius:8px;font-family:var(--mono);font-weight:700;font-size:13px;
-  background:var(--bg3);color:var(--text2);border:1.5px solid var(--border2);}
-.arr-val.hi{background:rgba(52,211,153,.15);color:var(--green);border-color:rgba(52,211,153,.4);}
-.arr-val.ans{background:rgba(52,211,153,.25);color:var(--green);border-color:var(--green);
-  box-shadow:0 0 12px rgba(52,211,153,.25);}
-.arr-idx{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px;}
+/* ── MAIN CONTENT ────────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 32px 36px;
+  max-width: 900px;
+}
 
-/* ACT BARS */
-.act-viz{padding:14px 16px;}
-.act-row2{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.act-lbl{font-family:var(--mono);font-size:11px;color:var(--text2);width:90px;flex-shrink:0;}
-.act-track{position:relative;flex:1;height:22px;background:var(--bg3);
-  border-radius:4px;border:1px solid var(--border);overflow:hidden;}
-.act-fill{position:absolute;height:100%;border-radius:3px;}
-.act-st{font-size:11px;font-family:var(--mono);font-weight:700;width:80px;flex-shrink:0;}
+/* ── PAGE ────────────────────────────────────────── */
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* ── ALGO TITLE BLOCK ────────────────────────────── */
+.algo-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.algo-number {
+  font-family: var(--display);
+  font-size: 72px;
+  line-height: 1;
+  color: rgba(0,229,255,0.12);
+  flex-shrink: 0;
+  margin-top: -8px;
+  user-select: none;
+}
+.algo-info {}
+.algo-name {
+  font-family: var(--display);
+  font-size: 2rem;
+  letter-spacing: 3px;
+  color: var(--bright);
+  line-height: 1.1;
+}
+.algo-desc {
+  font-size: 13px;
+  color: var(--dim);
+  margin-top: 6px;
+  line-height: 1.6;
+  max-width: 500px;
+}
+.algo-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.meta-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.chip-time { background: rgba(255,171,0,0.12); color: var(--amber); border: 1px solid rgba(255,171,0,0.25); }
+.chip-type { background: rgba(0,229,255,0.1);  color: var(--cyan);  border: 1px solid rgba(0,229,255,0.2); }
+.chip-space{ background: rgba(179,136,255,0.1); color: var(--violet);border: 1px solid rgba(179,136,255,0.2); }
+
+/* ── CODE PANEL ──────────────────────────────────── */
+.code-panel {
+  background: var(--ink2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.code-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ink3);
+  border-bottom: 1px solid var(--line);
+}
+.tbar-dot { width: 10px; height: 10px; border-radius: 50%; }
+.td-r{background:#ff5f57;} .td-y{background:#febc2e;} .td-g{background:#28c840;}
+.tbar-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 6px;
+}
+.code-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 340px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line2) transparent;
+}
+.code-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+.code-scroll::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+.code-tbl {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.85;
+}
+.code-tbl tr:hover { background: rgba(255,255,255,0.02); }
+.ln-td {
+  width: 46px; min-width: 46px;
+  padding: 0 12px 0 14px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 11px;
+  user-select: none;
+  border-right: 1px solid var(--line);
+  background: var(--ink3);
+  white-space: nowrap;
+  vertical-align: top;
+}
+.lc-td {
+  padding: 0 20px 0 14px;
+  white-space: pre;
+  color: var(--text);
+  vertical-align: top;
+}
+/* syntax */
+.kw  { color: #c792ea; font-weight: 600; }
+.fn  { color: #82aaff; }
+.tp  { color: #ffcb6b; }
+.nm  { color: #f78c6c; }
+.st  { color: #c3e88d; }
+.cm  { color: #546e7a; font-style: italic; }
+.op  { color: #89ddff; }
+/* highlight */
+.hl-tr .ln-td { background: rgba(0,229,255,0.1); color: var(--cyan); }
+.hl-tr .lc-td { background: rgba(0,229,255,0.05); border-left: 2px solid var(--cyan); }
+
+/* ── INPUT SECTION ───────────────────────────────── */
+.input-section {
+  background: var(--ink2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.section-head {
+  padding: 12px 18px;
+  background: var(--ink3);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-head .sh-icon { color: var(--cyan); }
+
+.input-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.field {}
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.field .hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--line2);
+  margin-bottom: 7px;
+}
+.field input {
+  width: 100%;
+  background: var(--ink);
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
+}
+.field input::placeholder { color: var(--line2); }
+
+.btn-row {
+  padding: 0 20px 20px;
+  display: flex;
+  gap: 10px;
+}
+.run-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: var(--cyan);
+  color: var(--ink);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--display);
+  font-size: 17px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(0,229,255,0.2);
+}
+.run-btn:hover {
+  background: #26f0ff;
+  box-shadow: 0 0 30px rgba(0,229,255,0.4);
+  transform: translateY(-1px);
+}
+.run-btn:active { transform: none; }
+.clr-btn {
+  padding: 12px 18px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.clr-btn:hover { color: var(--text); border-color: var(--dim); background: rgba(255,255,255,0.03); }
+
+/* ── OUTPUT ──────────────────────────────────────── */
+.output-section {
+  background: var(--ink2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.output-body {
+  padding: 20px;
+  min-height: 80px;
+}
+.placeholder-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  color: var(--muted);
+  text-align: center;
+}
+.placeholder-msg .ico { font-size: 2rem; }
+.placeholder-msg p { font-family: var(--mono); font-size: 12px; }
+
+/* output elements */
+.out-block {
+  background: var(--ink3);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow-x: auto;
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.75;
+}
+.out-block-head {
+  padding: 8px 14px;
+  background: var(--ink4);
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--dim);
+  text-transform: uppercase;
+}
+.out-block-body { padding: 14px; }
+
+/* step rows */
+.step-row {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  align-items: flex-start;
+}
+.step-row:last-child { border-bottom: none; }
+.step-badge {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  font-family: var(--mono);
+}
+.badge-ok  { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+.badge-skip{ background: rgba(255,82,82,0.12);  color: var(--red);   border: 1px solid rgba(255,82,82,0.25); }
+.badge-num { background: rgba(0,229,255,0.12);  color: var(--cyan);  border: 1px solid rgba(0,229,255,0.25); }
+.step-txt .ttl { font-weight: 600; color: var(--bright); font-size: 13px; }
+.step-txt .dtl { color: var(--dim); font-size: 11.5px; margin-top: 2px; }
+
+/* dp table */
+.dp-tbl { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 12px; }
+.dp-tbl th {
+  background: rgba(0,229,255,0.12); color: var(--cyan);
+  padding: 7px 12px; border: 1px solid var(--line2);
+  font-weight: 700; text-align: center;
+}
+.dp-tbl td {
+  padding: 7px 12px; border: 1px solid var(--line);
+  text-align: center; color: var(--dim);
+  transition: background 0.3s;
+}
+.dp-tbl td.ans { background: rgba(0,230,118,0.2); color: var(--green); font-weight: 700; }
+.dp-tbl td.hi  { background: rgba(0,229,255,0.1); color: var(--cyan); }
+.dp-tbl td.match{ background: rgba(179,136,255,0.15); color: var(--violet); }
+.dp-tbl tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* arr display */
+.arr-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+.arr-cell { text-align: center; }
+.arr-val {
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 7px;
+  font-family: var(--mono); font-weight: 700; font-size: 13px;
+  background: var(--ink4); color: var(--dim);
+  border: 1.5px solid var(--line2);
+}
+.arr-val.hi  { background: rgba(0,230,118,0.12); color: var(--green); border-color: rgba(0,230,118,0.4); }
+.arr-val.ans { background: rgba(0,230,118,0.25); color: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(0,230,118,0.25); }
+.arr-val.inf { color: var(--muted); }
+.arr-idx { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 3px; }
+
+/* answer */
+.answer-bar {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(0,230,118,0.06);
+  border: 1px solid rgba(0,230,118,0.3);
+  border-left: 4px solid var(--green);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin-top: 14px;
+}
+.answer-bar .ans-icon { font-size: 1.3rem; }
+.answer-bar .ans-lbl {
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(0,230,118,0.6); margin-bottom: 3px;
+}
+.answer-bar .ans-val {
+  font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--green);
+}
+
+/* error */
+.err-bar {
+  background: rgba(255,82,82,0.07);
+  border: 1px solid rgba(255,82,82,0.3);
+  border-radius: 8px; padding: 12px 16px;
+  font-family: var(--mono); font-size: 12.5px; color: var(--red);
+}
+
+/* activity timeline */
+.act-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.act-label { font-family: var(--mono); font-size: 11px; color: var(--dim); width: 90px; flex-shrink: 0; }
+.act-track { position: relative; flex: 1; height: 20px; background: var(--ink); border-radius: 4px; border: 1px solid var(--line); overflow: hidden; }
+.act-fill  { position: absolute; height: 100%; border-radius: 3px; transition: all 0.4s; }
+.act-status { font-size: 11px; font-family: var(--mono); font-weight: 700; width: 85px; flex-shrink: 0; }
+
+/* divider */
+.out-divider {
+  height: 1px; background: var(--line);
+  margin: 16px 0;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 760px) {
+  .sidebar { display: none; }
+  .main { padding: 20px; }
+  .header { padding: 24px 20px 20px; }
+}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-icon">⚙️</div>
-  <div>
-    <h1>Algorithm Runner</h1>
-    <p>Enter your own values — see full step-by-step output instantly</p>
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-badge">Algorithm Lab</div>
+    <h1>ALGO<span>LAB</span></h1>
+    <div class="header-sub">// 6 algorithms · user input · step-by-step output · C logic</div>
   </div>
 </div>
 
-<div class="tabs">
-  <button class="tab active" onclick="show(0)">① Frac. Knapsack</button>
-  <button class="tab" onclick="show(1)">② 0/1 Knapsack</button>
-  <button class="tab" onclick="show(2)">③ Activity Select</button>
-  <button class="tab" onclick="show(3)">④ LCS</button>
-  <button class="tab" onclick="show(4)">⑤ Coin Min</button>
-  <button class="tab" onclick="show(5)">⑥ Coin Ways</button>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-label">// algorithms</div>
+  <div class="nav-item active" onclick="showPage(0)">
+    <span class="nav-num">01</span>
+    <span class="nav-title">Fractional Knapsack</span>
+    <span class="nav-tag tag-greedy">Greedy</span>
+  </div>
+  <div class="nav-item" onclick="showPage(1)">
+    <span class="nav-num">02</span>
+    <span class="nav-title">0/1 Knapsack</span>
+    <span class="nav-tag tag-dp">DP 2D</span>
+  </div>
+  <div class="nav-item" onclick="showPage(2)">
+    <span class="nav-num">03</span>
+    <span class="nav-title">Activity Selection</span>
+    <span class="nav-tag tag-greedy">Greedy</span>
+  </div>
+  <div class="nav-item" onclick="showPage(3)">
+    <span class="nav-num">04</span>
+    <span class="nav-title">LCS</span>
+    <span class="nav-tag tag-dp">DP 2D</span>
+  </div>
+  <div class="nav-item" onclick="showPage(4)">
+    <span class="nav-num">05</span>
+    <span class="nav-title">Coin Min</span>
+    <span class="nav-tag tag-dp2">DP 1D</span>
+  </div>
+  <div class="nav-item" onclick="showPage(5)">
+    <span class="nav-num">06</span>
+    <span class="nav-title">Coin Ways</span>
+    <span class="nav-tag tag-dp2">DP 1D</span>
+  </div>
 </div>
 
-<!-- ══════════════ PAGE 0: FRACTIONAL KNAPSACK ══════════════ -->
+<!-- MAIN -->
+<div class="main">
+
+<!-- ═══ PAGE 0: FRACTIONAL KNAPSACK ═══ -->
 <div class="page active" id="pg0">
-  <div class="banner">
-    <div class="bnum">1</div>
-    <div class="binfo">
-      <h2>🎒 Fractional Knapsack</h2>
-      <p>Greedy — sort by value/weight ratio, take fractions allowed.</p>
-      <div class="badges"><span class="badge b-g">Greedy</span><span class="badge b-t">O(n log n)</span></div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="panel">
-      <div class="phead"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>&nbsp;&nbsp;fractional_knapsack.c</div>
-      <div class="code-wrap"><table class="ctbl" id="fk-c"></table></div>
-    </div>
-    <div class="panel">
-      <div class="phead">📥 Your Input</div>
-      <div class="input-body">
-        <div class="field-group">
-          <label class="field-label">Number of Items (n)</label>
-          <div class="field-desc">e.g.  3</div>
-          <input class="inp" id="fk-n" type="number" min="1" max="10" placeholder="3" value="3">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Weights (space separated)</label>
-          <div class="field-desc">e.g.  10 20 30</div>
-          <input class="inp" id="fk-w" type="text" placeholder="10 20 30" value="10 20 30">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Values (space separated)</label>
-          <div class="field-desc">e.g.  60 100 120</div>
-          <input class="inp" id="fk-v" type="text" placeholder="60 100 120" value="60 100 120">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Knapsack Capacity</label>
-          <div class="field-desc">e.g.  50</div>
-          <input class="inp" id="fk-cap" type="number" placeholder="50" value="50">
-        </div>
-        <button class="run-btn" onclick="runFk()">▶ Run Algorithm</button>
-        <button class="reset-btn" onclick="clearOut('fk-out')">↺ Clear</button>
+  <div class="algo-title-row">
+    <div class="algo-number">01</div>
+    <div class="algo-info">
+      <div class="algo-name">FRACTIONAL KNAPSACK</div>
+      <div class="algo-desc">Sort items by value/weight ratio. Take full items greedily; take a fraction of the last item if needed.</div>
+      <div class="algo-meta">
+        <span class="meta-chip chip-type">Greedy</span>
+        <span class="meta-chip chip-time">O(n log n)</span>
+        <span class="meta-chip chip-space">Space O(1)</span>
       </div>
     </div>
   </div>
-  <div class="out-area" id="fk-out"><div class="placeholder"><div class="ico">🎒</div>Enter values and click Run</div></div>
+
+  <div class="code-panel">
+    <div class="code-titlebar"><span class="tbar-dot td-r"></span><span class="tbar-dot td-y"></span><span class="tbar-dot td-g"></span><span class="tbar-name">fractional_knapsack.c</span></div>
+    <div class="code-scroll"><table class="code-tbl" id="code-fk"></table></div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-head"><span class="sh-icon">▸</span> INPUT YOUR VALUES</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Number of Items (n)</label>
+        <div class="hint">e.g. 3</div>
+        <input id="fk-n" type="number" min="1" max="10" placeholder="3" value="3">
+      </div>
+      <div class="field">
+        <label>Weights (space separated)</label>
+        <div class="hint">e.g. 10 20 30</div>
+        <input id="fk-w" type="text" placeholder="10 20 30" value="10 20 30">
+      </div>
+      <div class="field">
+        <label>Values (space separated)</label>
+        <div class="hint">e.g. 60 100 120</div>
+        <input id="fk-v" type="text" placeholder="60 100 120" value="60 100 120">
+      </div>
+      <div class="field">
+        <label>Capacity</label>
+        <div class="hint">e.g. 50</div>
+        <input id="fk-cap" type="number" placeholder="50" value="50">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="run-btn" onclick="runFk()">RUN</button>
+      <button class="clr-btn" onclick="clr('out-fk')">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="section-head"><span class="sh-icon">▸</span> OUTPUT</div>
+    <div class="output-body" id="out-fk"><div class="placeholder-msg"><div class="ico">🎒</div><p>Enter values and click RUN</p></div></div>
+  </div>
 </div>
 
-<!-- ══════════════ PAGE 1: 0/1 KNAPSACK ══════════════ -->
+<!-- ═══ PAGE 1: 0/1 KNAPSACK ═══ -->
 <div class="page" id="pg1">
-  <div class="banner">
-    <div class="bnum">2</div>
-    <div class="binfo">
-      <h2>🎒 0/1 Knapsack</h2>
-      <p>DP 2D table — include or exclude each item, no fractions.</p>
-      <div class="badges"><span class="badge b-g">DP 2D</span><span class="badge b-t">O(n×W)</span></div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="panel">
-      <div class="phead"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>&nbsp;&nbsp;knapsack_01.c</div>
-      <div class="code-wrap"><table class="ctbl" id="kn-c"></table></div>
-    </div>
-    <div class="panel">
-      <div class="phead">📥 Your Input</div>
-      <div class="input-body">
-        <div class="field-group">
-          <label class="field-label">Number of Items (n)</label>
-          <div class="field-desc">e.g.  4</div>
-          <input class="inp" id="kn-n" type="number" min="1" max="8" placeholder="4" value="4">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Weights (space separated)</label>
-          <div class="field-desc">e.g.  1 3 4 5</div>
-          <input class="inp" id="kn-w" type="text" placeholder="1 3 4 5" value="1 3 4 5">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Values (space separated)</label>
-          <div class="field-desc">e.g.  1 4 5 7</div>
-          <input class="inp" id="kn-v" type="text" placeholder="1 4 5 7" value="1 4 5 7">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Capacity (W)</label>
-          <div class="field-desc">e.g.  7</div>
-          <input class="inp" id="kn-cap" type="number" placeholder="7" value="7">
-        </div>
-        <button class="run-btn" onclick="runKn()">▶ Run Algorithm</button>
-        <button class="reset-btn" onclick="clearOut('kn-out')">↺ Clear</button>
+  <div class="algo-title-row">
+    <div class="algo-number">02</div>
+    <div class="algo-info">
+      <div class="algo-name">0/1 KNAPSACK</div>
+      <div class="algo-desc">Include or exclude each item — no fractions. Build 2D DP table. dp[i][w] = max value using first i items with capacity w.</div>
+      <div class="algo-meta">
+        <span class="meta-chip chip-type">DP 2D</span>
+        <span class="meta-chip chip-time">O(n × W)</span>
+        <span class="meta-chip chip-space">Space O(n×W)</span>
       </div>
     </div>
   </div>
-  <div class="out-area" id="kn-out"><div class="placeholder"><div class="ico">📊</div>Enter values and click Run</div></div>
+
+  <div class="code-panel">
+    <div class="code-titlebar"><span class="tbar-dot td-r"></span><span class="tbar-dot td-y"></span><span class="tbar-dot td-g"></span><span class="tbar-name">knapsack_01.c</span></div>
+    <div class="code-scroll"><table class="code-tbl" id="code-kn"></table></div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-head"><span class="sh-icon">▸</span> INPUT YOUR VALUES</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Number of Items (n)</label>
+        <div class="hint">e.g. 4</div>
+        <input id="kn-n" type="number" min="1" max="8" placeholder="4" value="4">
+      </div>
+      <div class="field">
+        <label>Weights (space separated)</label>
+        <div class="hint">e.g. 1 3 4 5</div>
+        <input id="kn-w" type="text" placeholder="1 3 4 5" value="1 3 4 5">
+      </div>
+      <div class="field">
+        <label>Values (space separated)</label>
+        <div class="hint">e.g. 1 4 5 7</div>
+        <input id="kn-v" type="text" placeholder="1 4 5 7" value="1 4 5 7">
+      </div>
+      <div class="field">
+        <label>Capacity (W)</label>
+        <div class="hint">e.g. 7</div>
+        <input id="kn-cap" type="number" placeholder="7" value="7">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="run-btn" onclick="runKn()">RUN</button>
+      <button class="clr-btn" onclick="clr('out-kn')">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="section-head"><span class="sh-icon">▸</span> OUTPUT — DP TABLE + RESULT</div>
+    <div class="output-body" id="out-kn"><div class="placeholder-msg"><div class="ico">📊</div><p>Enter values and click RUN</p></div></div>
+  </div>
 </div>
 
-<!-- ══════════════ PAGE 2: ACTIVITY SELECTION ══════════════ -->
+<!-- ═══ PAGE 2: ACTIVITY SELECTION ═══ -->
 <div class="page" id="pg2">
-  <div class="banner">
-    <div class="bnum">3</div>
-    <div class="binfo">
-      <h2>📅 Activity Selection</h2>
-      <p>Greedy — sort by end time, select max non-overlapping activities.</p>
-      <div class="badges"><span class="badge b-g">Greedy</span><span class="badge b-t">O(n log n)</span></div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="panel">
-      <div class="phead"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>&nbsp;&nbsp;activity_selection.c</div>
-      <div class="code-wrap"><table class="ctbl" id="ac-c"></table></div>
-    </div>
-    <div class="panel">
-      <div class="phead">📥 Your Input</div>
-      <div class="input-body">
-        <div class="field-group">
-          <label class="field-label">Number of Activities (n)</label>
-          <div class="field-desc">e.g.  6</div>
-          <input class="inp" id="ac-n" type="number" min="1" max="10" placeholder="6" value="6">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Start Times (space separated)</label>
-          <div class="field-desc">e.g.  1 2 4 6 5 8</div>
-          <input class="inp" id="ac-s" type="text" placeholder="1 2 4 6 5 8" value="1 2 4 6 5 8">
-        </div>
-        <div class="field-group">
-          <label class="field-label">End Times (space separated)</label>
-          <div class="field-desc">e.g.  3 5 6 7 8 9</div>
-          <input class="inp" id="ac-e" type="text" placeholder="3 5 6 7 8 9" value="3 5 6 7 8 9">
-        </div>
-        <button class="run-btn" onclick="runAc()">▶ Run Algorithm</button>
-        <button class="reset-btn" onclick="clearOut('ac-out')">↺ Clear</button>
+  <div class="algo-title-row">
+    <div class="algo-number">03</div>
+    <div class="algo-info">
+      <div class="algo-name">ACTIVITY SELECTION</div>
+      <div class="algo-desc">Sort activities by end time. Pick greedily: select activity if its start ≥ lastEnd. Maximises non-overlapping activities.</div>
+      <div class="algo-meta">
+        <span class="meta-chip chip-type">Greedy</span>
+        <span class="meta-chip chip-time">O(n log n)</span>
+        <span class="meta-chip chip-space">Space O(1)</span>
       </div>
     </div>
   </div>
-  <div class="out-area" id="ac-out"><div class="placeholder"><div class="ico">📅</div>Enter values and click Run</div></div>
+
+  <div class="code-panel">
+    <div class="code-titlebar"><span class="tbar-dot td-r"></span><span class="tbar-dot td-y"></span><span class="tbar-dot td-g"></span><span class="tbar-name">activity_selection.c</span></div>
+    <div class="code-scroll"><table class="code-tbl" id="code-ac"></table></div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-head"><span class="sh-icon">▸</span> INPUT YOUR VALUES</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Number of Activities (n)</label>
+        <div class="hint">e.g. 6</div>
+        <input id="ac-n" type="number" min="1" max="10" placeholder="6" value="6">
+      </div>
+      <div class="field">
+        <label>Start Times (space separated)</label>
+        <div class="hint">e.g. 1 2 4 6 5 8</div>
+        <input id="ac-s" type="text" placeholder="1 2 4 6 5 8" value="1 2 4 6 5 8">
+      </div>
+      <div class="field">
+        <label>End Times (space separated)</label>
+        <div class="hint">e.g. 3 5 6 7 8 9</div>
+        <input id="ac-e" type="text" placeholder="3 5 6 7 8 9" value="3 5 6 7 8 9">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="run-btn" onclick="runAc()">RUN</button>
+      <button class="clr-btn" onclick="clr('out-ac')">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="section-head"><span class="sh-icon">▸</span> OUTPUT — TIMELINE + STEPS</div>
+    <div class="output-body" id="out-ac"><div class="placeholder-msg"><div class="ico">📅</div><p>Enter values and click RUN</p></div></div>
+  </div>
 </div>
 
-<!-- ══════════════ PAGE 3: LCS ══════════════ -->
+<!-- ═══ PAGE 3: LCS ═══ -->
 <div class="page" id="pg3">
-  <div class="banner">
-    <div class="bnum">4</div>
-    <div class="binfo">
-      <h2>🔤 LCS — Longest Common Subsequence</h2>
-      <p>DP 2D table — match→diagonal+1, no match→max(top,left).</p>
-      <div class="badges"><span class="badge b-g">DP 2D</span><span class="badge b-t">O(m×n)</span></div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="panel">
-      <div class="phead"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>&nbsp;&nbsp;lcs.c</div>
-      <div class="code-wrap"><table class="ctbl" id="lc-c"></table></div>
-    </div>
-    <div class="panel">
-      <div class="phead">📥 Your Input</div>
-      <div class="input-body">
-        <div class="field-group">
-          <label class="field-label">String X</label>
-          <div class="field-desc">e.g.  AGGTAB</div>
-          <input class="inp" id="lc-x" type="text" placeholder="AGGTAB" value="AGGTAB">
-        </div>
-        <div class="field-group">
-          <label class="field-label">String Y</label>
-          <div class="field-desc">e.g.  GXTXAYB</div>
-          <input class="inp" id="lc-y" type="text" placeholder="GXTXAYB" value="GXTXAYB">
-        </div>
-        <button class="run-btn" onclick="runLc()">▶ Run Algorithm</button>
-        <button class="reset-btn" onclick="clearOut('lc-out')">↺ Clear</button>
+  <div class="algo-title-row">
+    <div class="algo-number">04</div>
+    <div class="algo-info">
+      <div class="algo-name">LONGEST COMMON SUBSEQUENCE</div>
+      <div class="algo-desc">Match → diagonal+1. No match → max(top, left). Answer at bottom-right. Backtrack to find the actual LCS string.</div>
+      <div class="algo-meta">
+        <span class="meta-chip chip-type">DP 2D</span>
+        <span class="meta-chip chip-time">O(m × n)</span>
+        <span class="meta-chip chip-space">Space O(m×n)</span>
       </div>
     </div>
   </div>
-  <div class="out-area" id="lc-out"><div class="placeholder"><div class="ico">🔤</div>Enter strings and click Run</div></div>
+
+  <div class="code-panel">
+    <div class="code-titlebar"><span class="tbar-dot td-r"></span><span class="tbar-dot td-y"></span><span class="tbar-dot td-g"></span><span class="tbar-name">lcs.c</span></div>
+    <div class="code-scroll"><table class="code-tbl" id="code-lc"></table></div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-head"><span class="sh-icon">▸</span> INPUT YOUR VALUES</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>String X</label>
+        <div class="hint">e.g. AGGTAB</div>
+        <input id="lc-x" type="text" placeholder="AGGTAB" value="AGGTAB">
+      </div>
+      <div class="field">
+        <label>String Y</label>
+        <div class="hint">e.g. GXTXAYB</div>
+        <input id="lc-y" type="text" placeholder="GXTXAYB" value="GXTXAYB">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="run-btn" onclick="runLc()">RUN</button>
+      <button class="clr-btn" onclick="clr('out-lc')">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="section-head"><span class="sh-icon">▸</span> OUTPUT — DP TABLE + LCS STRING</div>
+    <div class="output-body" id="out-lc"><div class="placeholder-msg"><div class="ico">🔤</div><p>Enter strings and click RUN</p></div></div>
+  </div>
 </div>
 
-<!-- ══════════════ PAGE 4: COIN MIN ══════════════ -->
+<!-- ═══ PAGE 4: COIN MIN ═══ -->
 <div class="page" id="pg4">
-  <div class="banner">
-    <div class="bnum">5</div>
-    <div class="binfo">
-      <h2>🪙 Coin Change — Minimum Coins</h2>
-      <p>DP 1D array — outer=amount, inner=coins. Find fewest coins.</p>
-      <div class="badges"><span class="badge b-g">DP 1D</span><span class="badge b-t">O(n×amt)</span></div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="panel">
-      <div class="phead"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>&nbsp;&nbsp;coin_change_min.c</div>
-      <div class="code-wrap"><table class="ctbl" id="cm-c"></table></div>
-    </div>
-    <div class="panel">
-      <div class="phead">📥 Your Input</div>
-      <div class="input-body">
-        <div class="field-group">
-          <label class="field-label">Coin Denominations (space separated)</label>
-          <div class="field-desc">e.g.  1 5 6 9</div>
-          <input class="inp" id="cm-coins" type="text" placeholder="1 5 6 9" value="1 5 6 9">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Target Amount</label>
-          <div class="field-desc">e.g.  11</div>
-          <input class="inp" id="cm-amt" type="number" placeholder="11" value="11">
-        </div>
-        <button class="run-btn" onclick="runCm()">▶ Run Algorithm</button>
-        <button class="reset-btn" onclick="clearOut('cm-out')">↺ Clear</button>
+  <div class="algo-title-row">
+    <div class="algo-number">05</div>
+    <div class="algo-info">
+      <div class="algo-name">COIN CHANGE — MIN COINS</div>
+      <div class="algo-desc">Outer loop = amount, inner = coins. dp[i] = min coins to make amount i. Tracks which coin was used for backtracking.</div>
+      <div class="algo-meta">
+        <span class="meta-chip chip-type">DP 1D</span>
+        <span class="meta-chip chip-time">O(n × amount)</span>
+        <span class="meta-chip chip-space">Space O(amount)</span>
       </div>
     </div>
   </div>
-  <div class="out-area" id="cm-out"><div class="placeholder"><div class="ico">🪙</div>Enter coins and amount, click Run</div></div>
+
+  <div class="code-panel">
+    <div class="code-titlebar"><span class="tbar-dot td-r"></span><span class="tbar-dot td-y"></span><span class="tbar-dot td-g"></span><span class="tbar-name">coin_change_min.c</span></div>
+    <div class="code-scroll"><table class="code-tbl" id="code-cm"></table></div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-head"><span class="sh-icon">▸</span> INPUT YOUR VALUES</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Coin Denominations</label>
+        <div class="hint">e.g. 1 5 6 9</div>
+        <input id="cm-coins" type="text" placeholder="1 5 6 9" value="1 5 6 9">
+      </div>
+      <div class="field">
+        <label>Target Amount</label>
+        <div class="hint">e.g. 11</div>
+        <input id="cm-amt" type="number" placeholder="11" value="11">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="run-btn" onclick="runCm()">RUN</button>
+      <button class="clr-btn" onclick="clr('out-cm')">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="section-head"><span class="sh-icon">▸</span> OUTPUT — dp[] ARRAY + COIN PATH</div>
+    <div class="output-body" id="out-cm"><div class="placeholder-msg"><div class="ico">🪙</div><p>Enter coins and amount, click RUN</p></div></div>
+  </div>
 </div>
 
-<!-- ══════════════ PAGE 5: COIN WAYS ══════════════ -->
+<!-- ═══ PAGE 5: COIN WAYS ═══ -->
 <div class="page" id="pg5">
-  <div class="banner">
-    <div class="bnum">6</div>
-    <div class="binfo">
-      <h2>🪙 Coin Change — Maximum Ways</h2>
-      <p>DP 1D array — outer=coins, inner=amount. Count all combinations.</p>
-      <div class="badges"><span class="badge b-g">DP 1D</span><span class="badge b-t">O(n×amt)</span></div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="panel">
-      <div class="phead"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>&nbsp;&nbsp;coin_change_ways.c</div>
-      <div class="code-wrap"><table class="ctbl" id="cw-c"></table></div>
-    </div>
-    <div class="panel">
-      <div class="phead">📥 Your Input</div>
-      <div class="input-body">
-        <div class="field-group">
-          <label class="field-label">Coin Denominations (space separated)</label>
-          <div class="field-desc">e.g.  1 2 3</div>
-          <input class="inp" id="cw-coins" type="text" placeholder="1 2 3" value="1 2 3">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Target Amount</label>
-          <div class="field-desc">e.g.  4</div>
-          <input class="inp" id="cw-amt" type="number" placeholder="4" value="4">
-        </div>
-        <button class="run-btn" onclick="runCw()">▶ Run Algorithm</button>
-        <button class="reset-btn" onclick="clearOut('cw-out')">↺ Clear</button>
+  <div class="algo-title-row">
+    <div class="algo-number">06</div>
+    <div class="algo-info">
+      <div class="algo-name">COIN CHANGE — MAX WAYS</div>
+      <div class="algo-desc">Outer loop = coins (prevents duplicates!). dp[j] += dp[j-coin]. dp[0]=1. Counts unique combinations only.</div>
+      <div class="algo-meta">
+        <span class="meta-chip chip-type">DP 1D</span>
+        <span class="meta-chip chip-time">O(n × amount)</span>
+        <span class="meta-chip chip-space">Space O(amount)</span>
       </div>
     </div>
   </div>
-  <div class="out-area" id="cw-out"><div class="placeholder"><div class="ico">🪙</div>Enter coins and amount, click Run</div></div>
+
+  <div class="code-panel">
+    <div class="code-titlebar"><span class="tbar-dot td-r"></span><span class="tbar-dot td-y"></span><span class="tbar-dot td-g"></span><span class="tbar-name">coin_change_ways.c</span></div>
+    <div class="code-scroll"><table class="code-tbl" id="code-cw"></table></div>
+  </div>
+
+  <div class="input-section">
+    <div class="section-head"><span class="sh-icon">▸</span> INPUT YOUR VALUES</div>
+    <div class="input-grid">
+      <div class="field">
+        <label>Coin Denominations</label>
+        <div class="hint">e.g. 1 2 3</div>
+        <input id="cw-coins" type="text" placeholder="1 2 3" value="1 2 3">
+      </div>
+      <div class="field">
+        <label>Target Amount</label>
+        <div class="hint">e.g. 4</div>
+        <input id="cw-amt" type="number" placeholder="4" value="4">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="run-btn" onclick="runCw()">RUN</button>
+      <button class="clr-btn" onclick="clr('out-cw')">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="section-head"><span class="sh-icon">▸</span> OUTPUT — dp[] PER COIN PASS</div>
+    <div class="output-body" id="out-cw"><div class="placeholder-msg"><div class="ico">🪙</div><p>Enter coins and amount, click RUN</p></div></div>
+  </div>
 </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
 
 <script>
-// ── NAV ──
-function show(i){
-  document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',i===j));
-  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+/* ═══════════════ NAV ═══════════════ */
+function showPage(i) {
+  document.querySelectorAll('.page').forEach((p,j) => p.classList.toggle('active', i===j));
+  document.querySelectorAll('.nav-item').forEach((n,j) => n.classList.toggle('active', i===j));
 }
-function clearOut(id){document.getElementById(id).innerHTML='<div class="placeholder"><div class="ico">🔄</div>Cleared — enter values and run again</div>';}
+function clr(id) {
+  document.getElementById(id).innerHTML = '<div class="placeholder-msg"><div class="ico">🔄</div><p>Cleared</p></div>';
+}
+function parseNums(id) { return document.getElementById(id).value.trim().split(/\s+/).map(Number).filter(x=>!isNaN(x)); }
+function pInt(id)      { return parseInt(document.getElementById(id).value)||0; }
+function pFloat(id)    { return parseFloat(document.getElementById(id).value)||0; }
+function pStr(id)      { return document.getElementById(id).value.trim().toUpperCase(); }
 
-// ── CODE BUILDER ──
-function buildCode(id, lines, hls=[]){
-  document.getElementById(id).innerHTML=lines.map((l,i)=>{
-    const h=hls.includes(i+1)?'hl':'';
-    return `<tr class="${h}"><td class="ln">${i+1}</td><td class="lc">${l}</td></tr>`;
+/* ═══════════════ CODE BUILDER ═══════════════ */
+function buildCode(tableId, lines, hls=[]) {
+  document.getElementById(tableId).innerHTML = lines.map((l,i) => {
+    const h = hls.includes(i+1) ? 'hl-tr' : '';
+    return `<tr class="${h}"><td class="ln-td">${i+1}</td><td class="lc-td">${l}</td></tr>`;
   }).join('');
 }
 
-// ── STEP CARD ──
-function stepCard(num, title, detail, color='#7b6cf7'){
-  return `<div class="step-item">
-    <div class="step-num" style="background:${color}22;color:${color};border:1.5px solid ${color}44">${num}</div>
-    <div class="step-content"><div class="step-title">${title}</div><div class="step-detail">${detail}</div></div>
+/* ═══════════════ HTML HELPERS ═══════════════ */
+function stepRow(badge, badgeCls, title, detail) {
+  return `<div class="step-row">
+    <div class="step-badge ${badgeCls}">${badge}</div>
+    <div class="step-txt"><div class="ttl">${title}</div><div class="dtl">${detail}</div></div>
   </div>`;
 }
-function ansBox(label, val){
-  return `<div class="answer"><div class="ans-icon">✅</div><div><div class="ans-label">${label}</div><div class="ans-val">${val}</div></div></div>`;
+function ansBar(label, val) {
+  return `<div class="answer-bar"><div class="ans-icon">✅</div><div><div class="ans-lbl">${label}</div><div class="ans-val">${val}</div></div></div>`;
 }
-function errBox(msg){return `<div class="err-box">⚠ ${msg}</div>`;}
-function parse(id){return document.getElementById(id).value.trim().split(/\s+/).map(Number).filter(x=>!isNaN(x));}
-function pInt(id){return parseInt(document.getElementById(id).value)||0;}
+function errBar(msg) { return `<div class="err-bar">⚠ ${msg}</div>`; }
+function outBlock(head, bodyHtml) {
+  return `<div class="out-block"><div class="out-block-head">${head}</div><div class="out-block-body">${bodyHtml}</div></div>`;
+}
+function arrDisp(vals, ansIdx=-1) {
+  return '<div class="arr-wrap">' + vals.map((v,i)=>{
+    const cls = i===ansIdx ? 'ans' : v!==null&&v!==Infinity&&v>0 ? 'hi' : v===Infinity||v==='∞'?'inf':'';
+    return `<div class="arr-cell"><div class="arr-val ${cls}">${v===Infinity?'∞':v}</div><div class="arr-idx">${i}</div></div>`;
+  }).join('') + '</div>';
+}
 
-// ═══════════════════════════════
-// 1. FRACTIONAL KNAPSACK
-// ═══════════════════════════════
-buildCode('fk-c',[
-  `<span class="kw">typedef struct</span> {`,
-  `    <span class="kw">double</span> weight, value;`,
-  `} <span class="tp">Item</span>;`,
+/* ═══════════════ CODE CONTENT ═══════════════ */
+buildCode('code-fk', [
+  `<span class="kw">typedef struct</span> { <span class="kw">double</span> weight, value; } <span class="tp">Item</span>;`,
   ``,
-  `<span class="cm">// Sort by value/weight ratio (DESC)</span>`,
-  `<span class="kw">int</span> <span class="fn">compare</span>(<span class="kw">const void</span> *a, <span class="kw">const void</span> *b) {`,
+  `<span class="cm">// Sort by value/weight ratio  HIGH → LOW</span>`,
+  `<span class="kw">int</span> <span class="fn">compare_frac</span>(<span class="kw">const void</span> *a, <span class="kw">const void</span> *b) {`,
   `    <span class="kw">double</span> r1 = ((<span class="tp">Item</span>*)a)->value / ((<span class="tp">Item</span>*)a)->weight;`,
   `    <span class="kw">double</span> r2 = ((<span class="tp">Item</span>*)b)->value / ((<span class="tp">Item</span>*)b)->weight;`,
   `    <span class="kw">return</span> (r2 > r1) - (r2 < r1);`,
   `}`,
   ``,
-  `<span class="kw">double</span> <span class="fn">fracKnapsack</span>(<span class="tp">Item</span> items[], <span class="kw">int</span> n, <span class="kw">double</span> cap) {`,
-  `    <span class="fn">qsort</span>(items, n, <span class="kw">sizeof</span>(<span class="tp">Item</span>), compare);`,
+  `<span class="kw">void</span> <span class="fn">fractionalKnapsack</span>() {`,
+  `    <span class="fn">qsort</span>(items, n, <span class="kw">sizeof</span>(<span class="tp">Item</span>), compare_frac);`,
   `    <span class="kw">double</span> total = <span class="nm">0.0</span>;`,
   `    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < n; i++) {`,
   `        <span class="kw">if</span> (cap >= items[i].weight) {`,
-  `            total += items[i].value;`,
+  `            total += items[i].value;   <span class="cm">// Take FULL item</span>`,
   `            cap   -= items[i].weight;`,
   `        } <span class="kw">else</span> {`,
   `            total += (cap / items[i].weight) * items[i].value;`,
-  `            <span class="kw">break</span>;`,
+  `            <span class="kw">break</span>;                    <span class="cm">// Bag full</span>`,
   `        }`,
   `    }`,
-  `    <span class="kw">return</span> total;`,
+  `    <span class="fn">printf</span>(<span class="st">"Max Value = %.2f\\n"</span>, total);`,
   `}`,
-],[16,17,18,19,20,21]);
+], [14,15,16,17,18,19]);
 
-function runFk(){
-  const n=pInt('fk-n'), ws=parse('fk-w'), vs=parse('fk-v'), cap=parseFloat(document.getElementById('fk-cap').value);
-  if(ws.length<n||vs.length<n||isNaN(cap)||cap<=0){document.getElementById('fk-out').innerHTML=errBox('Check your inputs. Need n weights, n values, and a valid capacity.');return;}
-  let items=[];
-  for(let i=0;i<n;i++) items.push({w:ws[i],v:vs[i],ratio:vs[i]/ws[i],orig:i+1});
-  items.sort((a,b)=>b.ratio-a.ratio);
-  let steps='', total=0, rem=cap;
-  items.forEach((it,i)=>{
-    if(rem<=0) return;
-    if(rem>=it.w){
-      const added=it.v; total+=added; rem-=it.w;
-      steps+=stepCard(i+1,`Item ${it.orig} (W=${it.w}, V=${it.v}) — ratio ${it.ratio.toFixed(2)}`,
-        `Capacity(${(rem+it.w).toFixed(1)}) ≥ weight(${it.w}) → TAKE FULL ITEM\nAdded value: +${it.v.toFixed(1)} | Remaining cap: ${rem.toFixed(1)} | Total: ${total.toFixed(2)}`,'#34d399');
-    } else {
-      const frac=rem/it.w, added=frac*it.v; total+=added; rem=0;
-      steps+=stepCard(i+1,`Item ${it.orig} (W=${it.w}, V=${it.v}) — ratio ${it.ratio.toFixed(2)}`,
-        `Capacity(${(rem+it.w*frac).toFixed(1)}) < weight(${it.w}) → TAKE FRACTION = ${rem.toFixed(1)}/${it.w}\nFraction: ${frac.toFixed(3)} × ${it.v} = +${added.toFixed(2)} | Total: ${total.toFixed(2)}`,'#fb923c');
-    }
-  });
-  // ratio table
-  let tbl=`<div class="tbl-wrap"><table class="res"><tr><th>Item</th><th>Weight</th><th>Value</th><th>Ratio (V/W)</th><th>Action</th></tr>`;
-  items.forEach(it=>{ tbl+=`<tr><td>${it.orig}</td><td>${it.w}</td><td>${it.v}</td><td class="lo">${it.ratio.toFixed(3)}</td><td>${it.w<=cap?'Full / Frac':'Skip'}</td></tr>`; });
-  tbl+=`</table></div>`;
-  document.getElementById('fk-out').innerHTML=
-    `<div class="out-head">📋 Sorted Items + Step Trace</div>${tbl}<div class="steps-list">${steps}</div>${ansBox('Max Value (Fractional Knapsack)', total.toFixed(2))}`;
-}
-
-// ═══════════════════════════════
-// 2. 0/1 KNAPSACK
-// ═══════════════════════════════
-buildCode('kn-c',[
-  `<span class="cm">// weights & values arrays, capacity W</span>`,
-  `<span class="kw">int</span> <span class="fn">max</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a > b ? a : b; }`,
+buildCode('code-kn', [
+  `<span class="kw">int</span> <span class="fn">max01</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a > b ? a : b; }`,
   ``,
-  `<span class="kw">int</span> <span class="fn">knapsack</span>(<span class="kw">int</span> w[], <span class="kw">int</span> v[], <span class="kw">int</span> n, <span class="kw">int</span> W) {`,
+  `<span class="kw">void</span> <span class="fn">zeroOneKnapsack</span>() {`,
   `    <span class="kw">int</span> dp[n+<span class="nm">1</span>][W+<span class="nm">1</span>];`,
-  `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">0</span>; i<=n; i++) {`,
-  `        <span class="kw">for</span> (<span class="kw">int</span> c=<span class="nm">0</span>; c<=W; c++) {`,
-  `            <span class="kw">if</span> (i==<span class="nm">0</span> || c==<span class="nm">0</span>)`,
-  `                dp[i][c] = <span class="nm">0</span>;            <span class="cm">// base case</span>`,
+  `    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i <= n; i++) {`,
+  `        <span class="kw">for</span> (<span class="kw">int</span> c = <span class="nm">0</span>; c <= W; c++) {`,
+  `            <span class="kw">if</span> (i == <span class="nm">0</span> || c == <span class="nm">0</span>)`,
+  `                dp[i][c] = <span class="nm">0</span>;               <span class="cm">// base case</span>`,
   `            <span class="kw">else if</span> (w[i-<span class="nm">1</span>] <= c)`,
-  `                dp[i][c] = <span class="fn">max</span>(          <span class="cm">// include vs exclude</span>`,
-  `                    v[i-<span class="nm">1</span>] + dp[i-<span class="nm">1</span>][c-w[i-<span class="nm">1</span>]],`,
+  `                dp[i][c] = <span class="fn">max01</span>(           <span class="cm">// include vs exclude</span>`,
+  `                    v[i-<span class="nm">1</span>] + dp[i-<span class="nm">1</span>][c - w[i-<span class="nm">1</span>]],`,
   `                    dp[i-<span class="nm">1</span>][c]);`,
   `            <span class="kw">else</span>`,
-  `                dp[i][c] = dp[i-<span class="nm">1</span>][c]; <span class="cm">// too heavy</span>`,
+  `                dp[i][c] = dp[i-<span class="nm">1</span>][c];      <span class="cm">// too heavy</span>`,
   `        }`,
   `    }`,
-  `    <span class="kw">return</span> dp[n][W];`,
+  `    <span class="fn">printf</span>(<span class="st">"Max Value = %d\\n"</span>, dp[n][W]);`,
   `}`,
-],[8,9,10,11,12,13,14,15]);
+], [7,8,9,10,11,12,13,14]);
 
-function runKn(){
-  const n=pInt('kn-n'), ws=parse('kn-w'), vs=parse('kn-v'), W=pInt('kn-cap');
-  if(ws.length<n||vs.length<n||W<=0){document.getElementById('kn-out').innerHTML=errBox('Check inputs — need n weights, n values, and capacity > 0.');return;}
-  const dp=Array.from({length:n+1},()=>new Array(W+1).fill(0));
-  for(let i=1;i<=n;i++) for(let c=1;c<=W;c++){
-    if(ws[i-1]<=c) dp[i][c]=Math.max(vs[i-1]+dp[i-1][c-ws[i-1]],dp[i-1][c]);
-    else dp[i][c]=dp[i-1][c];
-  }
-  // table
-  let tbl=`<div class="tbl-wrap"><table class="res"><tr><th>i\\w</th>`;
-  for(let c=0;c<=W;c++) tbl+=`<th>${c}</th>`;
-  tbl+='</tr>';
-  for(let i=0;i<=n;i++){
-    tbl+=`<tr><th style="color:var(--blue)">${i===0?'base':`i${i}(${ws[i-1]},${vs[i-1]})`}</th>`;
-    for(let c=0;c<=W;c++){
-      const isAns=i===n&&c===W;
-      tbl+=`<td class="${isAns?'hi':''}">${dp[i][c]}</td>`;
-    }
-    tbl+='</tr>';
-  }
-  tbl+='</table></div>';
-  // steps for last row
-  let steps='';
-  for(let c=1;c<=W;c++){
-    const inc=ws[n-1]<=c?vs[n-1]+dp[n-1][c-ws[n-1]]:-1;
-    const exc=dp[n-1][c];
-    if(ws[n-1]>c) steps+=stepCard(c,`Cap=${c}: Item${n}(w=${ws[n-1]}) too heavy`,`Skip → dp[${n}][${c}] = dp[${n-1}][${c}] = ${dp[n][c]}`,'#7d8aaa');
-    else steps+=stepCard(c,`Cap=${c}: Include(${inc}) vs Exclude(${exc})`,`dp[${n}][${c}] = max(${vs[n-1]}+dp[${n-1}][${c-ws[n-1]}], dp[${n-1}][${c}]) = max(${inc},${exc}) = ${dp[n][c]}`,dp[n][c]===inc?'#34d399':'#38bdf8');
-  }
-  document.getElementById('kn-out').innerHTML=
-    `<div class="out-head">📊 DP Table (rows=items, cols=capacity)</div>${tbl}<div class="out-head" style="border-top:1px solid var(--border)">🔍 Last Row Trace (Item ${n})</div><div class="steps-list">${steps}</div>${ansBox(`Max Value (0/1 Knapsack, W=${W})`, dp[n][W])}`;
-}
-
-// ═══════════════════════════════
-// 3. ACTIVITY SELECTION
-// ═══════════════════════════════
-buildCode('ac-c',[
+buildCode('code-ac', [
   `<span class="kw">typedef struct</span> { <span class="kw">int</span> start, end, id; } <span class="tp">Activity</span>;`,
   ``,
-  `<span class="cm">// Sort by END time (NOT start time!)</span>`,
-  `<span class="kw">int</span> <span class="fn">compare</span>(<span class="kw">const void</span> *a, <span class="kw">const void</span> *b) {`,
+  `<span class="cm">// Sort by FINISH TIME — NOT start time!</span>`,
+  `<span class="kw">int</span> <span class="fn">compare_act</span>(<span class="kw">const void</span> *a, <span class="kw">const void</span> *b) {`,
   `    <span class="kw">return</span> ((<span class="tp">Activity</span>*)a)->end - ((<span class="tp">Activity</span>*)b)->end;`,
   `}`,
   ``,
-  `<span class="kw">void</span> <span class="fn">actSel</span>(<span class="tp">Activity</span> acts[], <span class="kw">int</span> n) {`,
-  `    <span class="fn">qsort</span>(acts, n, <span class="kw">sizeof</span>(<span class="tp">Activity</span>), compare);`,
-  `    <span class="kw">int</span> lastEnd = -<span class="nm">1</span>;`,
+  `<span class="kw">void</span> <span class="fn">activitySelection</span>() {`,
+  `    <span class="fn">qsort</span>(acts, n, <span class="kw">sizeof</span>(<span class="tp">Activity</span>), compare_act);`,
+  `    <span class="kw">int</span> lastEnd = -<span class="nm">1</span>, count = <span class="nm">0</span>;`,
   `    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < n; i++) {`,
-  `        <span class="kw">if</span> (acts[i].start >= lastEnd) {   <span class="cm">// no overlap</span>`,
-  `            <span class="fn">printf</span>(<span class="st">"A%d "</span>, acts[i].id);     <span class="cm">// SELECT</span>`,
+  `        <span class="kw">if</span> (acts[i].start >= lastEnd) {   <span class="cm">// No overlap</span>`,
+  `            <span class="fn">printf</span>(<span class="st">"A%d "</span>, acts[i].id);`,
   `            lastEnd = acts[i].end;`,
+  `            count++;`,
   `        }`,
+  `        <span class="cm">// else: skip — overlaps with last selected</span>`,
   `    }`,
   `}`,
-],[12,13,14]);
+], [12,13,14,15]);
 
-function runAc(){
-  const n=pInt('ac-n'), ss=parse('ac-s'), es=parse('ac-e');
-  if(ss.length<n||es.length<n){document.getElementById('ac-out').innerHTML=errBox('Need n start times and n end times.');return;}
-  let acts=[];
-  for(let i=0;i<n;i++) acts.push({s:ss[i],e:es[i],id:i+1});
-  acts.sort((a,b)=>a.e-b.e);
-  const maxE=Math.max(...acts.map(a=>a.e));
-  let selected=[],lastEnd=-1,steps='';
-  acts.forEach((a,i)=>{
-    const ok=a.s>=lastEnd;
-    if(ok){selected.push(a.id);lastEnd=a.e;}
-    steps+=stepCard(i+1,`A${a.id} (start=${a.s}, end=${a.e})`,
-      `lastEnd=${lastEnd-(ok?a.e:0)} → ${a.s}${ok?'≥':'<'}${lastEnd-(ok?a.e:0)} → ${ok?'✅ SELECT, lastEnd='+a.e:'❌ SKIP (overlap)'}`,ok?'#34d399':'#f87171');
-  });
-  // bars
-  let bars='<div class="act-viz">';
-  acts.forEach(a=>{
-    const isSel=selected.includes(a.id);
-    const left=Math.round(a.s/maxE*200), width=Math.max(6,Math.round((a.e-a.s)/maxE*200));
-    const col=isSel?'#34d399':'#f87171';
-    bars+=`<div class="act-row2">
-      <div class="act-lbl">A${a.id} (${a.s}→${a.e})</div>
-      <div class="act-track"><div class="act-fill" style="left:${left}px;width:${width}px;background:${col};opacity:${isSel?1:0.4}"></div></div>
-      <div class="act-st" style="color:${col}">${isSel?'✅ SELECTED':'❌ SKIP'}</div>
-    </div>`;
-  });
-  bars+='</div>';
-  document.getElementById('ac-out').innerHTML=
-    `<div class="out-head">📅 Timeline (sorted by end time)</div>${bars}<div class="out-head" style="border-top:1px solid var(--border)">🔍 Step Trace</div><div class="steps-list">${steps}</div>${ansBox('Selected Activities',`A${selected.join(', A')}  →  Total: ${selected.length}`)}`;
-}
-
-// ═══════════════════════════════
-// 4. LCS
-// ═══════════════════════════════
-buildCode('lc-c',[
-  `<span class="cm">// X and Y are input strings</span>`,
-  `<span class="kw">int</span> <span class="fn">max</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a > b ? a : b; }`,
-  ``,
-  `<span class="kw">int</span> <span class="fn">LCS</span>(<span class="kw">char</span> *X, <span class="kw">char</span> *Y) {`,
-  `    <span class="kw">int</span> m=<span class="fn">strlen</span>(X), n=<span class="fn">strlen</span>(Y);`,
+buildCode('code-lc', [
+  `<span class="kw">void</span> <span class="fn">lcs</span>() {`,
+  `    <span class="kw">int</span> m = <span class="fn">strlen</span>(X), n = <span class="fn">strlen</span>(Y);`,
   `    <span class="kw">int</span> dp[m+<span class="nm">1</span>][n+<span class="nm">1</span>];`,
-  `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">0</span>; i<=m; i++) {`,
-  `        <span class="kw">for</span> (<span class="kw">int</span> j=<span class="nm">0</span>; j<=n; j++) {`,
-  `            <span class="kw">if</span> (i==<span class="nm">0</span> || j==<span class="nm">0</span>)`,
+  `    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i <= m; i++)`,
+  `        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">0</span>; j <= n; j++) {`,
+  `            <span class="kw">if</span> (i == <span class="nm">0</span> || j == <span class="nm">0</span>)`,
   `                dp[i][j] = <span class="nm">0</span>;`,
   `            <span class="kw">else if</span> (X[i-<span class="nm">1</span>] == Y[j-<span class="nm">1</span>])`,
-  `                dp[i][j] = <span class="nm">1</span> + dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>]; <span class="cm">// MATCH→diag+1</span>`,
+  `                dp[i][j] = <span class="nm">1</span> + dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>]; <span class="cm">// MATCH→diagonal+1</span>`,
   `            <span class="kw">else</span>`,
-  `                dp[i][j] = <span class="fn">max</span>(dp[i-<span class="nm">1</span>][j], <span class="cm">// max(top,left)</span>`,
-  `                               dp[i][j-<span class="nm">1</span>]);`,
+  `                dp[i][j] = <span class="fn">maxLCS</span>(dp[i-<span class="nm">1</span>][j], <span class="cm">// max(top, left)</span>`,
+  `                                   dp[i][j-<span class="nm">1</span>]);`,
   `        }`,
-  `    }`,
-  `    <span class="kw">return</span> dp[m][n]; <span class="cm">// bottom-right = answer</span>`,
+  `    <span class="fn">printf</span>(<span class="st">"LCS Length = %d\\n"</span>, dp[m][n]);`,
   `}`,
-],[11,12,13,14,15]);
+], [8,9,10,11,12]);
 
-function runLc(){
-  const X=document.getElementById('lc-x').value.trim().toUpperCase();
-  const Y=document.getElementById('lc-y').value.trim().toUpperCase();
-  if(!X||!Y){document.getElementById('lc-out').innerHTML=errBox('Enter both strings.');return;}
-  const m=X.length,n=Y.length;
-  if(m>15||n>15){document.getElementById('lc-out').innerHTML=errBox('Strings too long (max 15 chars each) for table display.');return;}
-  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
-  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){
-    if(X[i-1]===Y[j-1]) dp[i][j]=1+dp[i-1][j-1];
-    else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
-  }
-  // backtrack LCS string
-  let lcsStr='',i=m,j=n;
-  while(i>0&&j>0){
-    if(X[i-1]===Y[j-1]){lcsStr=X[i-1]+lcsStr;i--;j--;}
-    else if(dp[i-1][j]>dp[i][j-1]) i--;
-    else j--;
-  }
-  // table
-  let tbl=`<div class="tbl-wrap"><table class="res"><tr><th></th><th>""</th>`;
-  for(let j2=0;j2<n;j2++) tbl+=`<th>${Y[j2]}</th>`;
-  tbl+='</tr>';
-  for(let i2=0;i2<=m;i2++){
-    tbl+=`<tr><th style="color:var(--blue)">${i2===0?'""':X[i2-1]}</th>`;
-    for(let j2=0;j2<=n;j2++){
-      const isAns=i2===m&&j2===n;
-      const isMatch=i2>0&&j2>0&&X[i2-1]===Y[j2-1]&&dp[i2][j2]>dp[i2-1][j2-1];
-      tbl+=`<td class="${isAns?'hi':isMatch?'lo':''}">${dp[i2][j2]}</td>`;
-    }
-    tbl+='</tr>';
-  }
-  tbl+='</table></div>';
-  let steps='';
-  for(let i2=1;i2<=m;i2++) for(let j2=1;j2<=n;j2++){
-    if(X[i2-1]===Y[j2-1])
-      steps+=stepCard(`${i2},${j2}`,`X[${i2-1}]='${X[i2-1]}' == Y[${j2-1}]='${Y[j2-1]}' → MATCH`,`dp[${i2}][${j2}] = 1 + dp[${i2-1}][${j2-1}] = 1 + ${dp[i2-1][j2-1]} = ${dp[i2][j2]}`,'#34d399');
-    else
-      steps+=stepCard(`${i2},${j2}`,`X[${i2-1}]='${X[i2-1]}' ≠ Y[${j2-1}]='${Y[j2-1]}' → no match`,`dp[${i2}][${j2}] = max(top=${dp[i2-1][j2]}, left=${dp[i2][j2-1]}) = ${dp[i2][j2]}`,'#7b6cf7');
-  }
-  document.getElementById('lc-out').innerHTML=
-    `<div class="out-head">📊 DP Table (green=match, purple=max choice, ✅=answer)</div>${tbl}<div class="out-head" style="border-top:1px solid var(--border)">🔍 Cell-by-Cell Trace</div><div class="steps-list">${steps}</div>${ansBox(`LCS of "${X}" and "${Y}"`,`Length = ${dp[m][n]}   |   LCS = "${lcsStr}"`)}`;
-}
-
-// ═══════════════════════════════
-// 5. COIN CHANGE MIN
-// ═══════════════════════════════
-buildCode('cm-c',[
-  `<span class="cm">// coins[] = your denominations</span>`,
-  `<span class="kw">int</span> <span class="fn">minCoins</span>(<span class="kw">int</span> coins[], <span class="kw">int</span> n, <span class="kw">int</span> amt) {`,
-  `    <span class="kw">int</span> dp[amt+<span class="nm">1</span>];`,
+buildCode('code-cm', [
+  `<span class="kw">void</span> <span class="fn">minCoins</span>() {`,
+  `    <span class="kw">int</span> dp[amt+<span class="nm">1</span>], from[amt+<span class="nm">1</span>];`,
   `    dp[<span class="nm">0</span>] = <span class="nm">0</span>;`,
-  `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">1</span>; i<=amt; i++) dp[i]=INT_MAX;`,
+  `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">1</span>; i<=amt; i++) dp[i] = INT_MAX;`,
   ``,
-  `    <span class="cm">// Outer loop = AMOUNT (key difference!)</span>`,
+  `    <span class="cm">// Outer loop = AMOUNT  ← KEY difference from "ways"</span>`,
   `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">1</span>; i<=amt; i++) {`,
   `        <span class="kw">for</span> (<span class="kw">int</span> j=<span class="nm">0</span>; j<n; j++) {`,
-  `            <span class="kw">if</span> (coins[j] <= i &&`,
-  `                    dp[i-coins[j]] != INT_MAX)`,
-  `                dp[i] = <span class="fn">min</span>(dp[i],`,
-  `                            dp[i-coins[j]] + <span class="nm">1</span>);`,
+  `            <span class="kw">if</span> (coins[j] <= i && dp[i-coins[j]] != INT_MAX)`,
+  `                <span class="kw">if</span> (dp[i-coins[j]] + <span class="nm">1</span> < dp[i]) {`,
+  `                    dp[i]   = dp[i-coins[j]] + <span class="nm">1</span>;`,
+  `                    from[i] = coins[j];`,
+  `                }`,
   `        }`,
   `    }`,
-  `    <span class="kw">return</span> dp[amt]; <span class="cm">// -1 if impossible</span>`,
+  `    <span class="fn">printf</span>(<span class="st">"Min coins = %d\\n"</span>, dp[amt]);`,
   `}`,
-],[8,9,10,11,12,13]);
+], [7,8,9,10,11,12]);
 
-function runCm(){
-  const coins=parse('cm-coins'), amt=pInt('cm-amt');
-  if(!coins.length||amt<=0){document.getElementById('cm-out').innerHTML=errBox('Enter valid coins and amount > 0.');return;}
-  if(amt>100){document.getElementById('cm-out').innerHTML=errBox('Amount too large (max 100) for step display.');return;}
-  const dp=new Array(amt+1).fill(Infinity);
-  const from=new Array(amt+1).fill(-1);
-  dp[0]=0;
-  for(let i=1;i<=amt;i++) for(const c of coins) if(c<=i&&dp[i-c]!==Infinity&&dp[i-c]+1<dp[i]){dp[i]=dp[i-c]+1;from[i]=c;}
-  // array display
-  let arrHtml='<div class="arr-disp">';
-  for(let i=0;i<=amt;i++){
-    const v=dp[i]===Infinity?'∞':dp[i];
-    arrHtml+=`<div class="arr-cell"><div class="arr-val ${i===amt&&dp[i]!==Infinity?'ans':dp[i]!==Infinity?'hi':''}">${v}</div><div class="arr-idx">dp[${i}]</div></div>`;
-  }
-  arrHtml+='</div>';
-  // steps
-  let steps='';
-  for(let i=1;i<=amt;i++){
-    const bestCoin=from[i];
-    if(dp[i]===Infinity) steps+=stepCard(i,`dp[${i}] = ∞ (impossible)`,`No coin combination reaches exactly ${i}`,'#f87171');
-    else steps+=stepCard(i,`dp[${i}] = ${dp[i]}`,`Best coin=${bestCoin} → dp[${i}-${bestCoin}]+1 = dp[${i-bestCoin}]+1 = ${dp[i]}${dp[i]===1?' (single coin!)':''}`,i===amt?'#34d399':'#7b6cf7');
-  }
-  // reconstruct
-  let path=[],cur=amt;
-  while(cur>0&&from[cur]!==-1){path.push(from[cur]);cur-=from[cur];}
-  const pathStr=dp[amt]===Infinity?'No solution':path.join(' + ')+` = ${amt}`;
-  document.getElementById('cm-out').innerHTML=
-    `<div class="out-head">📦 dp[] Array (each slot = min coins for that amount)</div>${arrHtml}<div class="out-head" style="border-top:1px solid var(--border)">🔍 Step Trace</div><div class="steps-list">${steps}</div>${dp[amt]===Infinity?errBox(`Cannot make ${amt} with coins {${coins.join(', ')}}`):ansBox(`Min Coins for amount ${amt}`,`${dp[amt]} coins  →  ${pathStr}`)}`;
-}
-
-// ═══════════════════════════════
-// 6. COIN CHANGE WAYS
-// ═══════════════════════════════
-buildCode('cw-c',[
-  `<span class="cm">// coins[] = your denominations</span>`,
-  `<span class="kw">long long</span> <span class="fn">maxWays</span>(<span class="kw">int</span> coins[], <span class="kw">int</span> n, <span class="kw">int</span> amt) {`,
+buildCode('code-cw', [
+  `<span class="kw">void</span> <span class="fn">maxWays</span>() {`,
   `    <span class="kw">long long</span> dp[amt+<span class="nm">1</span>];`,
   `    dp[<span class="nm">0</span>] = <span class="nm">1</span>;  <span class="cm">// 1 way to make 0</span>`,
   `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">1</span>; i<=amt; i++) dp[i] = <span class="nm">0</span>;`,
   ``,
-  `    <span class="cm">// Outer loop = COINS (no duplicates!)</span>`,
+  `    <span class="cm">// Outer loop = COINS  ← prevents duplicate combos!</span>`,
   `    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">0</span>; i<n; i++)`,
   `        <span class="kw">for</span> (<span class="kw">int</span> j=coins[i]; j<=amt; j++)`,
   `            dp[j] += dp[j - coins[i]];`,
   ``,
-  `    <span class="kw">return</span> dp[amt];`,
+  `    <span class="fn">printf</span>(<span class="st">"Total ways = %lld\\n"</span>, dp[amt]);`,
   `}`,
-],[8,9,10]);
+], [7,8,9]);
 
-function runCw(){
-  const coins=parse('cw-coins'), amt=pInt('cw-amt');
-  if(!coins.length||amt<=0){document.getElementById('cw-out').innerHTML=errBox('Enter valid coins and amount > 0.');return;}
-  if(amt>50){document.getElementById('cw-out').innerHTML=errBox('Amount too large (max 50) for step display.');return;}
-  const phases=[{label:'Initial',dp:[...new Array(amt+1).fill(0).map((_,i)=>i===0?1:0)]}];
-  let dp=new Array(amt+1).fill(0); dp[0]=1;
-  for(const c of coins){
-    for(let j=c;j<=amt;j++) dp[j]+=dp[j-c];
-    phases.push({label:`After coin=${c}`, dp:[...dp], coin:c});
-  }
-  // phase tables
-  let phasesHtml='';
-  phases.forEach((ph,pi)=>{
-    const isLast=pi===phases.length-1;
-    let arrHtml='<div class="arr-disp">';
-    ph.dp.forEach((v,i)=>{arrHtml+=`<div class="arr-cell"><div class="arr-val ${isLast&&i===amt?'ans':i>0&&v>0?'hi':''}">${v}</div><div class="arr-idx">${i}</div></div>`;});
-    arrHtml+='</div>';
-    phasesHtml+=`<div style="margin-bottom:8px"><div class="out-head" style="border-top:1px solid var(--border)">${isLast?'✅ ':''} ${ph.label}</div>${arrHtml}</div>`;
+/* ═══════════════ ALGORITHM LOGIC ═══════════════ */
+
+/* ── 1. FRACTIONAL KNAPSACK ── */
+function runFk() {
+  const n = pInt('fk-n'), ws = parseNums('fk-w'), vs = parseNums('fk-v'), cap = pFloat('fk-cap');
+  if (ws.length < n || vs.length < n || cap <= 0)
+    return document.getElementById('out-fk').innerHTML = errBar('Check inputs — need n weights, n values, and valid capacity.');
+
+  let items = [];
+  for (let i = 0; i < n; i++) items.push({w:ws[i], v:vs[i], ratio:vs[i]/ws[i], id:i+1});
+  items.sort((a,b) => b.ratio - a.ratio);
+
+  let total = 0, rem = cap, stepsHtml = '';
+  // ratio table
+  let tblHtml = `<table class="dp-tbl"><tr><th>Item</th><th>Weight</th><th>Value</th><th>Ratio (V/W)</th><th>Action</th></tr>`;
+  items.forEach(it => {
+    tblHtml += `<tr><td>${it.id}</td><td>${it.w}</td><td>${it.v}</td><td class="hi">${it.ratio.toFixed(3)}</td><td>-</td></tr>`;
   });
-  // steps
+  tblHtml += '</table>';
+
+  items.forEach((it, i) => {
+    if (rem <= 0) return;
+    if (rem >= it.w) {
+      total += it.v; rem -= it.w;
+      stepsHtml += stepRow(i+1,'badge-ok',`Item ${it.id} (W=${it.w}, V=${it.v}) ratio=${it.ratio.toFixed(2)}`,`cap(${(rem+it.w).toFixed(1)}) ≥ w(${it.w}) → TAKE FULL  |  +${it.v}  |  cap left: ${rem.toFixed(1)}  |  total: ${total.toFixed(2)}`);
+    } else {
+      const frac = rem/it.w, added = frac*it.v; total += added; rem = 0;
+      stepsHtml += stepRow(i+1,'badge-num',`Item ${it.id} (W=${it.w}, V=${it.v}) → FRACTION`,`Take ${(frac*100).toFixed(1)}% → ${frac.toFixed(3)} × ${it.v} = +${added.toFixed(2)}  |  total: ${total.toFixed(2)}`);
+    }
+  });
+
+  document.getElementById('out-fk').innerHTML =
+    outBlock('SORTED ITEMS (by ratio)', tblHtml) +
+    outBlock('STEP TRACE', stepsHtml) +
+    ansBar('Max Value (Fractional Knapsack)', total.toFixed(2));
+}
+
+/* ── 2. 0/1 KNAPSACK ── */
+function runKn() {
+  const n = pInt('kn-n'), ws = parseNums('kn-w'), vs = parseNums('kn-v'), W = pInt('kn-cap');
+  if (ws.length < n || vs.length < n || W <= 0)
+    return document.getElementById('out-kn').innerHTML = errBar('Check inputs.');
+
+  const dp = Array.from({length:n+1}, () => new Array(W+1).fill(0));
+  for (let i=1; i<=n; i++) for (let c=1; c<=W; c++) {
+    if (ws[i-1] <= c) dp[i][c] = Math.max(vs[i-1]+dp[i-1][c-ws[i-1]], dp[i-1][c]);
+    else              dp[i][c] = dp[i-1][c];
+  }
+
+  let tbl = `<table class="dp-tbl"><tr><th>i\\w</th>`;
+  for (let c=0; c<=W; c++) tbl += `<th>${c}</th>`;
+  tbl += '</tr>';
+  for (let i=0; i<=n; i++) {
+    tbl += `<tr><th style="color:var(--cyan);background:rgba(0,229,255,0.08)">${i===0?'base':`i${i}(${ws[i-1]},${vs[i-1]})`}</th>`;
+    for (let c=0; c<=W; c++) {
+      const isAns = i===n && c===W;
+      tbl += `<td class="${isAns?'ans':''}">${dp[i][c]}</td>`;
+    }
+    tbl += '</tr>';
+  }
+  tbl += '</table>';
+
+  let steps = '';
+  for (let c=1; c<=W; c++) {
+    if (ws[n-1] > c) {
+      steps += stepRow(c,'badge-num',`cap=${c}: Item${n} too heavy`,`dp[${n}][${c}] = dp[${n-1}][${c}] = ${dp[n][c]}`);
+    } else {
+      const inc = vs[n-1]+dp[n-1][c-ws[n-1]], exc = dp[n-1][c];
+      steps += stepRow(c,dp[n][c]===inc?'badge-ok':'badge-num',`cap=${c}: include(${inc}) vs exclude(${exc})`,`dp[${n}][${c}] = max(${vs[n-1]}+dp[${n-1}][${c-ws[n-1]}], dp[${n-1}][${c}]) = max(${inc},${exc}) = ${dp[n][c]}`);
+    }
+  }
+  document.getElementById('out-kn').innerHTML =
+    outBlock('DP TABLE  (rows=items, cols=capacity)', tbl) +
+    outBlock(`LAST ROW TRACE  (Item ${n})`, steps) +
+    ansBar(`Max Value (0/1 Knapsack, W=${W})`, dp[n][W]);
+}
+
+/* ── 3. ACTIVITY SELECTION ── */
+function runAc() {
+  const n = pInt('ac-n'), ss = parseNums('ac-s'), es = parseNums('ac-e');
+  if (ss.length < n || es.length < n)
+    return document.getElementById('out-ac').innerHTML = errBar('Need n start times and n end times.');
+
+  let acts = [];
+  for (let i=0; i<n; i++) acts.push({s:ss[i], e:es[i], id:i+1});
+  acts.sort((a,b) => a.e - b.e);
+
+  const maxE = Math.max(...acts.map(a=>a.e));
+  let sel=[], lastEnd=-1, stepsHtml='';
+
+  acts.forEach((a,i) => {
+    const ok = a.s >= lastEnd;
+    if (ok) { sel.push(a.id); lastEnd = a.e; }
+    stepsHtml += stepRow(`A${a.id}`, ok?'badge-ok':'badge-skip',
+      `A${a.id} (start=${a.s}, end=${a.e})`,
+      ok ? `start(${a.s}) ≥ lastEnd(${lastEnd-a.e+(a.e)}) → ✅ SELECT  |  lastEnd = ${a.e}`
+         : `start(${a.s}) < lastEnd(${lastEnd}) → ❌ SKIP (overlaps)`);
+  });
+
+  const barsHtml = acts.map(a => {
+    const isSel = sel.includes(a.id);
+    const left = Math.round(a.s/maxE*220), w = Math.max(8, Math.round((a.e-a.s)/maxE*220));
+    const col = isSel ? 'var(--green)' : 'var(--red)';
+    return `<div class="act-row">
+      <div class="act-label">A${a.id} (${a.s}→${a.e})</div>
+      <div class="act-track"><div class="act-fill" style="left:${left}px;width:${w}px;background:${col};opacity:${isSel?1:0.35}"></div></div>
+      <div class="act-status" style="color:${col}">${isSel?'✅ SELECTED':'❌ SKIP'}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('out-ac').innerHTML =
+    outBlock('TIMELINE  (sorted by end time)', barsHtml) +
+    outBlock('STEP TRACE', stepsHtml) +
+    ansBar('Selected Activities', `A${sel.join(', A')}  →  Total: ${sel.length}`);
+}
+
+/* ── 4. LCS ── */
+function runLc() {
+  const X = pStr('lc-x'), Y = pStr('lc-y');
+  if (!X || !Y) return document.getElementById('out-lc').innerHTML = errBar('Enter both strings.');
+  if (X.length>14||Y.length>14) return document.getElementById('out-lc').innerHTML = errBar('Max 14 chars each for table display.');
+
+  const m=X.length, n=Y.length;
+  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+  for (let i=1;i<=m;i++) for (let j=1;j<=n;j++) {
+    if (X[i-1]===Y[j-1]) dp[i][j] = 1+dp[i-1][j-1];
+    else                  dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+  }
+
+  // backtrack
+  let lcsStr='', i=m, j=n;
+  while(i>0&&j>0) {
+    if(X[i-1]===Y[j-1]){lcsStr=X[i-1]+lcsStr;i--;j--;}
+    else if(dp[i-1][j]>dp[i][j-1]) i--;
+    else j--;
+  }
+
+  let tbl = `<table class="dp-tbl"><tr><th></th><th>""</th>`;
+  for(let j2=0;j2<n;j2++) tbl+=`<th>${Y[j2]}</th>`;
+  tbl+='</tr>';
+  for(let i2=0;i2<=m;i2++) {
+    tbl+=`<tr><th style="color:var(--cyan);background:rgba(0,229,255,0.08)">${i2===0?'""':X[i2-1]}</th>`;
+    for(let j2=0;j2<=n;j2++) {
+      const isAns=i2===m&&j2===n;
+      const isMatch=i2>0&&j2>0&&X[i2-1]===Y[j2-1]&&dp[i2][j2]>dp[i2-1][j2-1];
+      tbl+=`<td class="${isAns?'ans':isMatch?'match':''}">${dp[i2][j2]}</td>`;
+    }
+    tbl+='</tr>';
+  }
+  tbl+='</table>';
+
+  let steps='';
+  for(let i2=1;i2<=m;i2++) for(let j2=1;j2<=n;j2++) {
+    if(X[i2-1]===Y[j2-1])
+      steps+=stepRow(`${i2},${j2}`,'badge-ok',`X[${i2-1}]='${X[i2-1]}' == Y[${j2-1}]='${Y[j2-1]}' → MATCH`,`dp[${i2}][${j2}] = 1 + dp[${i2-1}][${j2-1}] = 1+${dp[i2-1][j2-1]} = ${dp[i2][j2]}`);
+    else
+      steps+=stepRow(`${i2},${j2}`,'badge-num',`X[${i2-1}]='${X[i2-1]}' ≠ Y[${j2-1}]='${Y[j2-1]}' → no match`,`dp[${i2}][${j2}] = max(top=${dp[i2-1][j2]}, left=${dp[i2][j2-1]}) = ${dp[i2][j2]}`);
+  }
+
+  document.getElementById('out-lc').innerHTML =
+    outBlock('DP TABLE  (purple=match cell, ✅=answer)', tbl) +
+    outBlock('CELL-BY-CELL TRACE', steps) +
+    ansBar(`LCS of "${X}" and "${Y}"`, `Length = ${dp[m][n]}  |  LCS = "${lcsStr}"`);
+}
+
+/* ── 5. COIN MIN ── */
+function runCm() {
+  const coins = parseNums('cm-coins'), amt = pInt('cm-amt');
+  if (!coins.length||amt<=0) return document.getElementById('out-cm').innerHTML = errBar('Enter valid coins and amount > 0.');
+  if (amt>60) return document.getElementById('out-cm').innerHTML = errBar('Max amount 60 for display.');
+
+  const dp = new Array(amt+1).fill(Infinity);
+  const from = new Array(amt+1).fill(-1);
+  dp[0]=0;
+  for(let i=1;i<=amt;i++) for(const c of coins)
+    if(c<=i && dp[i-c]!==Infinity && dp[i-c]+1<dp[i]) { dp[i]=dp[i-c]+1; from[i]=c; }
+
+  const arrVals = dp.map(v => v===Infinity?'∞':v);
+  let steps='';
+  for(let i=1;i<=amt;i++) {
+    const bc=from[i];
+    if(dp[i]===Infinity) steps+=stepRow(i,'badge-skip',`dp[${i}] = ∞`,`No coin combination reaches ${i}`);
+    else steps+=stepRow(i,i===amt?'badge-ok':'badge-num',`dp[${i}] = ${dp[i]}`,`coin=${bc} → dp[${i}-${bc}]+1 = dp[${i-bc}]+1 = ${dp[i]}`);
+  }
+
+  let path=[],cur=amt;
+  while(cur>0&&from[cur]!==-1){path.push(from[cur]);cur-=from[cur];}
+
+  document.getElementById('out-cm').innerHTML =
+    outBlock('dp[] ARRAY  (each index = amount, value = min coins needed)',
+      `<div class="arr-wrap">${arrVals.map((v,i)=>`<div class="arr-cell"><div class="arr-val ${i===amt&&dp[i]!==Infinity?'ans':v!=='∞'&&parseInt(v)>0?'hi':v==='∞'?'inf':''}">${v}</div><div class="arr-idx">${i}</div></div>`).join('')}</div>`) +
+    outBlock('STEP TRACE', steps) +
+    (dp[amt]===Infinity ? errBar(`Cannot make ${amt} with coins {${coins.join(', ')}}`) :
+      ansBar(`Min Coins for amount ${amt}`, `${dp[amt]} coins  →  ${path.join(' + ')} = ${amt}`));
+}
+
+/* ── 6. COIN WAYS ── */
+function runCw() {
+  const coins = parseNums('cw-coins'), amt = pInt('cw-amt');
+  if (!coins.length||amt<=0) return document.getElementById('out-cw').innerHTML = errBar('Enter valid coins and amount > 0.');
+  if (amt>40) return document.getElementById('out-cw').innerHTML = errBar('Max amount 40 for display.');
+
+  let dp = new Array(amt+1).fill(0); dp[0]=1;
+  const phases = [{label:'Initial (dp[0]=1, rest=0)', dp:[...dp]}];
+  for(const c of coins) {
+    for(let j=c;j<=amt;j++) dp[j]+=dp[j-c];
+    phases.push({label:`After coin = ${c}`, dp:[...dp], coin:c});
+  }
+
+  let phasesHtml='';
+  phases.forEach((ph,pi) => {
+    const isLast=pi===phases.length-1;
+    const arrHtml='<div class="arr-wrap">'+ph.dp.map((v,i)=>{
+      const cls=isLast&&i===amt?'ans':v>0&&i>0?'hi':'';
+      return `<div class="arr-cell"><div class="arr-val ${cls}">${v}</div><div class="arr-idx">${i}</div></div>`;
+    }).join('')+'</div>';
+    phasesHtml+=`<div style="margin-bottom:16px">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px">${ph.label}</div>
+      ${arrHtml}
+    </div>`;
+  });
+
   let steps='';
   coins.forEach((c,ci)=>{
-    const prev=ci===0?new Array(amt+1).fill(0).map((_,i)=>i===0?1:0):[...phases[ci].dp];
-    const cur=phases[ci+1].dp;
-    let changed=[];
-    for(let j=c;j<=amt;j++) if(cur[j]!==prev[j]) changed.push(`dp[${j}]: ${prev[j]}+dp[${j}-${c}]=${prev[j]}+${prev[j-c]}=${cur[j]}`);
-    steps+=stepCard(ci+1,`Process coin = ${c}`,changed.join('\n')||'No changes','#7b6cf7');
+    const prev=phases[ci].dp, cur=phases[ci+1].dp;
+    let changes=[];
+    for(let j=c;j<=amt;j++) if(cur[j]!==prev[j]) changes.push(`dp[${j}]: ${prev[j]}+dp[${j}-${c}]=${prev[j]}+${prev[j-c]}=${cur[j]}`);
+    steps+=stepRow(ci+1,'badge-num',`coin = ${c}`,changes.slice(0,6).join('  |  ')+(changes.length>6?'  ...':''));
   });
-  document.getElementById('cw-out').innerHTML=
-    `<div class="out-head">📊 dp[] Array After Each Coin Pass</div>${phasesHtml}<div class="out-head" style="border-top:1px solid var(--border)">🔍 Coin-by-Coin Trace</div><div class="steps-list">${steps}</div>${ansBox(`Ways to make ${amt} with coins {${coins.join(', ')}}`,`${dp[amt]} combination${dp[amt]===1?'':'s'}`)}`;
+
+  document.getElementById('out-cw').innerHTML =
+    outBlock('dp[] AFTER EACH COIN PASS', phasesHtml) +
+    outBlock('COIN-BY-COIN TRACE', steps) +
+    ansBar(`Ways to make ${amt} with {${coins.join(', ')}}`, `${dp[amt]} combination${dp[amt]===1?'':'s'}`);
 }
 </script>
 </body>
